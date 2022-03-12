@@ -23,6 +23,7 @@ const Friends = ({ navigation }) => {
     const unsubscribe = navigation.addListener('focus', async () => {
       // The screen is focused
       setLoading(true);
+      setDataList([]);
       await getFriendsList();
       setLoading(false);
     });
@@ -33,15 +34,17 @@ const Friends = ({ navigation }) => {
   }, []);
   const getFriendsList = async () => {
     setRefreshing(true);
+    setDataList([]);
     const loggedInUser = await GetUserInfo();
     await getAllFriends(loggedInUser.token)
       .then(async (responseJson) => {
+        setDataList([]);
         if (responseJson.length === 0) {
           setNotFound(true);
           setRefreshing(false);
           setLoading(false);
         } else {
-          setDataList([]);
+          setNotFound(false);
           await responseJson.forEach(async (element) => {
             const picture = await getProfilePhoto1(
               element.user_id,
@@ -67,8 +70,6 @@ const Friends = ({ navigation }) => {
     <View style={styles.container}>
       {loading ? (
         <Loader1 />
-      ) : dataList.length === 0 ? (
-        <NoRecordFound />
       ) : (
         <FlatList
           style={{ width: '97%' }}
@@ -80,15 +81,7 @@ const Friends = ({ navigation }) => {
               onRefresh={() => getFriendsList()}
             />
           }
-          ListHeaderComponent={
-            notFound && (
-              <Text
-                style={{ fontSize: 20, textAlign: 'center', marginTop: '75%' }}
-              >
-                No Record found
-              </Text>
-            )
-          }
+          ListHeaderComponent={notFound && <NoRecordFound />}
           renderItem={({ item }) => (
             <View
               style={[
@@ -103,7 +96,7 @@ const Friends = ({ navigation }) => {
             >
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate('Profile', {
+                  navigation.navigate('FriendProfile', {
                     user_id: item.user_id,
                   })
                 }
@@ -140,8 +133,7 @@ const Friends = ({ navigation }) => {
               }}
             />
           )}
-          keyExtractor={(item) => item.user_id.toString()}
-          // ListHeaderComponent={renderHeader}
+          keyExtractor={(item, index) => index.toString()}
         />
       )}
     </View>

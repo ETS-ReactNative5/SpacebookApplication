@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Login from './src/Screens/Login';
 import SignUp from './src/Screens/SignUp';
 import Profile from './src/Screens/profile';
+import FriendProfile from './src/Screens/FriendProfile';
 import EditProfile from './src/Screens/EditProfile';
 import Home from './src/Screens/Home';
 import CreatePost from './src/Screens/CreatePost';
@@ -19,7 +20,6 @@ import Search from './src/Screens/Search';
 import Draft from './src/Screens/Draft';
 import EditDraft from './src/Screens/EditDraft';
 import Schedule from './src/Screens/Schedule';
-import BottomSheet from './src/Screens/BottomSheet';
 
 import { postSchedules_Posts } from './src/Screens/API';
 import {
@@ -81,13 +81,13 @@ export default function App() {
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="DrawerNavigation"
-            component={DrawerNavigation}
+            name="BottomTab"
+            component={BottomTab}
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="BottomTab"
-            component={BottomTab}
+            name="DrawerNavigation"
+            component={DrawerNavigation}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>
@@ -120,6 +120,7 @@ export default function App() {
             options={{ title: '' }}
           />
           <Stack.Screen name="EditProfile" component={EditProfile} />
+          <Stack.Screen name="FriendProfile" component={FriendProfile} />
           <Stack.Screen name="EditPost" component={EditPost} />
           <Stack.Screen
             name="Login"

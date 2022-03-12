@@ -7,14 +7,8 @@ import {
   DrawerItem,
 } from '@react-navigation/drawer';
 import { Avatar, Caption } from 'react-native-paper';
-import {
-  Entypo,
-  FontAwesome5,
-  MaterialIcons,
-  Ionicons,
-  FontAwesome,
-} from '@expo/vector-icons';
-import { get, post, GetUserData } from '../Screens/API';
+import { Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { get, post, GetUserData, getProfilePhoto1 } from '../Screens/API';
 import GetUserInfo, { RemoveUserInfo } from '../utils/async-storage';
 
 import BottomTab from '../Screens/BottomTab';
@@ -24,7 +18,7 @@ import Schedule from '../Screens/Schedule';
 import Profile from '../Screens/profile';
 import Search from '../Screens/Search';
 
-const CustomDrawerContent = (props) => {
+const CustomDrawerContent = (props, { navigation }) => {
   const [user, setUser] = useState({
     user_id: 0,
     token: '',
@@ -32,25 +26,58 @@ const CustomDrawerContent = (props) => {
     last_name: '',
     email: '',
     friend_count: 0,
-    profile: null,
   });
+  const [profile, setProfile] = useState(null);
+
   useEffect(async () => {
     const loggedInUser = await GetUserInfo();
-    await GetUserData.then((res) => {
-      console.log(res.friend_count);
-      setUser({
-        user_id: res.user_id,
-        token: loggedInUser.token,
-        first_name: res.first_name,
-        last_name: res.last_name,
-        email: res.email,
-        friend_count: res.friend_count,
-        profile: res.profile,
-      });
-    }).catch((err) => {
-      alert(err), props.navigation.navigate('Login');
-    });
+    await getUserInfo(loggedInUser.id, loggedInUser.token);
+
+    await getProfilePhoto1(loggedInUser.id, loggedInUser.token)
+      .then((res) => setProfile(res))
+      .catch(() => console.log('Error in getting profile'));
+    // await GetUserData.then((res) => {
+    //   console.log(res.friend_count);
+    //   setUser({
+    //     user_id: res.user_id,
+    //     token: loggedInUser.token,
+    //     first_name: res.first_name,
+    //     last_name: res.last_name,
+    //     email: res.email,
+    //     friend_count: res.friend_count,
+    //     profile: res.profile,
+    //   });
+    // }).catch((err) => {
+    //   alert(err), props.navigation.navigate('Login');
+    // });
   }, []);
+  const getUserInfo = async (id, token) => {
+    return get(`user/${id}`, token)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.json();
+        }
+        throw 'Something went wrong';
+      })
+      .then((JsonResponse) => {
+        // setToken(token);
+        // setUser_id(JsonResponse.user_id);
+        // setFirst_name(JsonResponse.first_name);
+        // setLast_name(JsonResponse.last_name);
+        // setEmail(JsonResponse.email);
+        setUser({
+          user_id: JsonResponse.user_id,
+          token: token,
+          first_name: JsonResponse.first_name,
+          last_name: JsonResponse.last_name,
+          email: JsonResponse.email,
+          friend_count: JsonResponse.friend_count,
+        });
+      })
+      .catch((err) => {
+        alert(err);
+      });
+  };
 
   const logout = async () => {
     const loggedInUser = await GetUserInfo();
@@ -84,7 +111,7 @@ const CustomDrawerContent = (props) => {
             alignItems: 'center',
           }}
         >
-          <Avatar.Image source={{ uri: `${user.profile}` }} size={60} />
+          <Avatar.Image source={{ uri: `${profile}` }} size={60} />
           <View style={{ flexDirection: 'column', marginLeft: 10, flex: 1 }}>
             <Text
               style={{
@@ -132,6 +159,15 @@ const CustomDrawerContent = (props) => {
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigation = ({ navigation, ScreenName }) => {
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // do something
+      console.log('feed is focused');
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}

@@ -344,6 +344,7 @@ const CreatePost = ({ navigation, route }) => {
   );
 };
 export default CreatePost;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

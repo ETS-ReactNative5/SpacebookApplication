@@ -145,7 +145,7 @@ const AddFriend = ({ navigation }) => {
             <View style={[CommonStyles.rowViewFlexStart, { padding: 10 }]}>
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate('Profile', {
+                  navigation.navigate('FriendProfile', {
                     user_id: item.user_id,
                   })
                 }

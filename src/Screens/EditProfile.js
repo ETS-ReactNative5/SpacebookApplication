@@ -32,14 +32,13 @@ import { patch, saveProfilePhoto, convertImageToBase64 } from './API';
 import Loader3 from '../Components/Loader3';
 
 const EditProfile = ({ route }) => {
-  const { first_name, last_name, email,Profile } = route.params;
+  const { first_name, last_name, email, Profile } = route.params;
   const [visible, setVisible] = useState(false);
 
   const [base64Image, setBase64Image] = useState(Profile);
   const [firstName, setFirstName] = useState(first_name);
   const [lastName, setLastName] = useState(last_name);
   const [Email, setEmail] = useState(email);
-  const [password1, setPassword1] = useState('');
   const [isSavingData, setIsSavingData] = useState(false); //TODO: true when save button click to start loading
   const save = async () => {
     const loggedInUser = await GetUserInfo();
@@ -56,7 +55,6 @@ const EditProfile = ({ route }) => {
       first_name: firstName,
       last_name: lastName,
       email: Email,
-     // password: password1,
     };
     return patch(`user/${id}`, headers, Data)
       .then((response) => {
@@ -202,13 +200,6 @@ const EditProfile = ({ route }) => {
             onChangeText={(txt) => setEmail(txt)}
           />
         </View>
-        {/* <View style={CommonStyles.textInputView}>
-          <TextInput
-            style={CommonStyles.textInput}
-            value={password1}
-            onChangeText={(txt) => setPassword1(txt)}
-          />
-        </View> */}
         <TouchableOpacity
           disabled={isSavingData}
           onPress={() => {

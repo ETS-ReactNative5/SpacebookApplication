@@ -3,7 +3,7 @@ import { View, Text, Platform, Dimensions } from 'react-native';
 import AnimatedLottieView from 'lottie-react-native';
 const SplashScreen = () => {
   const { height, width } = Dimensions.get('screen');
-  if (Platform.OS == 'android' || Platform.OS=='ios') {
+  if (Platform.OS == 'android') {
     return (
       <View
         style={{

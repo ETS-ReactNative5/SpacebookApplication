@@ -9,7 +9,7 @@ import GetUserInfo, {
 import CommonStyles from './Styles/Common/CommonStyle';
 import { get, post, getProfilePhoto1 } from './API';
 import Loader1 from '../Components/Loader1';
-const Profile = ({ navigation, route }) => {
+const FriendProfile = ({ navigation, route }) => {
   const [base64Image, setBase64Image] = useState(null);
   const [isLoggedInUser, setIsLoggedInUser] = useState(false);
   const [first_name, setFirst_name] = useState('');
@@ -23,17 +23,29 @@ const Profile = ({ navigation, route }) => {
     const unsubscribe = navigation.addListener('focus', async () => {
       //TODO: The screen is focused
       const loggedInUser = await GetUserInfo();
-      let id = loggedInUser.id;
 
+      let id =
+        typeof route.params.user_id === 'undefined'
+          ? loggedInUser.id
+          : route.params.user_id;
       await getUserInfo(id, loggedInUser.token);
-      const profile = await getProfilePhoto1(id, loggedInUser.token);
+      // await getUserInfo(loggedInUser.id, loggedInUser.token);
+      const profile = await getProfilePhoto1(
+        id,
+        // loggedInUser.id,
+        loggedInUser.token
+      );
       setBase64Image(profile);
+      loggedInUser.id === id
+        ? setIsLoggedInUser(true)
+        : setIsLoggedInUser(false); //TODO: to haldle edit button
     });
     return () => unsubscribe;
   }, [navigation]);
 
   const getUserInfo = async (id, token) => {
     setLoading(true);
+
     return get(`user/${id}`, token)
       .then((res) => {
         if (res.status === 200) {
@@ -52,30 +64,18 @@ const Profile = ({ navigation, route }) => {
       })
       .finally(() => setLoading(false));
   };
-  const logout = async () => {
-    const loggedInUser = await GetUserInfo();
-    const headers = {
-      'X-Authorization': loggedInUser.token,
-    };
-    return post('logout', headers)
-      .then(async (res) => {
-        if (res.status === 200) {
-          await RemoveUserInfo();
-          console.log('logout');
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Login' }],
-          });
-        }
-      })
-      .catch((err) => alert(`err${err}`));
-  };
+
   return (
     <View style={CommonStyles.container}>
       {loading ? (
         <Loader1 />
       ) : (
-        <View style={[CommonStyles.container, { width: '100%' }]}>
+        <View
+          style={[
+            CommonStyles.container,
+            { width: '100%', justifyContent: 'flex-start', marginTop: '20%' },
+          ]}
+        >
           <Image
             style={CommonStyles.largeImage}
             source={{ uri: `${base64Image}` }}
@@ -86,35 +86,9 @@ const Profile = ({ navigation, route }) => {
           </Text>
           <Text style={CommonStyles.textBold}>{email}</Text>
           <Text style={CommonStyles.textBold}>Friends : {friends_count}</Text>
-
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('EditProfile', {
-                first_name,
-                last_name,
-                email,
-                Profile: base64Image,
-              })
-            }
-            style={[CommonStyles.btnTouchable, { width: '80%' }]}
-          >
-            <Text style={CommonStyles.btnText}>Edit</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => logout()}
-            style={[
-              CommonStyles.btnTouchable,
-              { width: '80%', backgroundColor: '#f0f0f0' },
-            ]}
-          >
-            <Text style={[CommonStyles.btnText, { color: '#000' }]}>
-              Logout
-            </Text>
-          </TouchableOpacity>
         </View>
       )}
     </View>
   );
 };
-export default Profile;
+export default FriendProfile;

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import GetUserInfo from '../utils/async-storage';
 import { get, post, remove } from './API';
-import Loader1 from '../Components/Loader1';
+
 import Loader2 from '../Components/Loader2';
 import NoRecordFound from '../Components/NoRecordFound';
 const FriendRequest = ({ navigation }) => {

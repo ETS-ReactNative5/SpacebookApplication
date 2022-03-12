@@ -35,7 +35,6 @@ const Home = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [notFound, setNotFound] = useState(false);
   useEffect(async () => {
-    let isMounted = true; // note mutable flag
     const unsubscribe = navigation.addListener('focus', async () => {
       //TODO: The screen is focused
       setLoading(true);
@@ -43,9 +42,7 @@ const Home = ({ navigation }) => {
       setLoading(false);
     });
     //TODO: Return the function to unsubscribe from the event so it gets removed on unmount
-    return () => {
-      unsubscribe, (isMounted = false);
-    };
+    return () => unsubscribe;
   }, [navigation]);
 
   const getPosts = async () => {
@@ -57,16 +54,7 @@ const Home = ({ navigation }) => {
       .then((res) => setBase64Image(res))
       .catch(() => console.log('Error in getting profile'));
 
-    //TODO: getting loggedin userinfo like name,email etc.
-    // await loggedInUserInfo(loggedInUser.id, loggedInUser.token);
-    await GetUserData.then((res) => {
-      console.log(res.friend_count);
-      setToken(res.token);
-      setUser_id(res.user_id);
-      setFirst_name(res.first_name);
-      setLast_name(res.last_name);
-      setEmail(res.email);
-    });
+    await getUserInfo(loggedInUser.id, loggedInUser.token);
 
     //TODO: getting list of all posts of loggedin user and also his friends post
     const allPosts = await GetAllPosts(
@@ -80,8 +68,30 @@ const Home = ({ navigation }) => {
     setRefreshing(false);
   };
 
+  const getUserInfo = async (id, token) => {
+    return get(`user/${id}`, token)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.json();
+        }
+        throw 'Something went wrong';
+      })
+      .then((JsonResponse) => {
+        setToken(token);
+        setUser_id(JsonResponse.user_id);
+        setFirst_name(JsonResponse.first_name);
+        setLast_name(JsonResponse.last_name);
+        setEmail(JsonResponse.email);
+      })
+      .catch((err) => {
+        alert(err);
+      });
+  };
+
   // TODO: this method will add like in databse through api.
   const saveLike = async (user_id, token, post_id) => {
+    console.log('save like called....');
+
     const headers = {
       'Content-Type': 'application/json',
       'X-Authorization': token,
@@ -124,6 +134,7 @@ const Home = ({ navigation }) => {
 
   // TODO: this method will delete like from posts.
   const deleteLike = async (user_id, token, post_id) => {
+    console.log('delete like called....');
     const headers = {
       'Content-Type': 'application/json',
       'X-Authorization': token,
@@ -169,7 +180,8 @@ const Home = ({ navigation }) => {
     const loggedInUser = await GetUserInfo();
     const newData = postList.map((item) => {
       if (item.post_id === selectedPostId) {
-        !item.like
+        console.log(item.like, !item.like);
+        item.like === false
           ? saveLike(post_authorId, loggedInUser.token, selectedPostId)
           : deleteLike(post_authorId, loggedInUser.token, selectedPostId);
       }
@@ -225,10 +237,12 @@ const Home = ({ navigation }) => {
             <View
               style={[CommonStyles.rowView, { padding: 10, marginBottom: 5 }]}
             >
-              <Image
-                style={CommonStyles.normalImage}
-                source={{ uri: `${base64Image}` }}
-              />
+              <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <Image
+                  style={CommonStyles.normalImage}
+                  source={{ uri: `${base64Image}` }}
+                />
+              </TouchableOpacity>
               <TouchableOpacity
                 style={CommonStyles.btnCreatePost}
                 onPress={() => {
@@ -242,7 +256,7 @@ const Home = ({ navigation }) => {
                   });
                 }}
               >
-                <Text>Whats on Your Mind?</Text>
+                <Text>Whats on Your Mind,{first_name}?</Text>
               </TouchableOpacity>
             </View>
           }
@@ -250,11 +264,15 @@ const Home = ({ navigation }) => {
             <View style={CommonStyles.postCard}>
               <View style={CommonStyles.rowView}>
                 <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate('Profile', {
-                      user_id: item.author.user_id,
-                    })
-                  }
+                  onPress={() => {
+                    loggedInUserId === item.author.user_id
+                      ? navigation.navigate('Profile', {
+                          user_id: item.author.user_id,
+                        })
+                      : navigation.navigate('FriendProfile', {
+                          user_id: item.author.user_id,
+                        });
+                  }}
                 >
                   <Image
                     style={CommonStyles.smallImage}
@@ -331,7 +349,8 @@ const Home = ({ navigation }) => {
                 <Text style={CommonStyles.txtLikeCount}>{item.numLikes}</Text>
               </View>
 
-              <View
+              <TouchableOpacity
+                onPress={() => handleLike(item.author.user_id, item.post_id)}
                 style={[
                   CommonStyles.rowView,
                   {
@@ -344,26 +363,12 @@ const Home = ({ navigation }) => {
                 ]}
               >
                 {item.like ? (
-                  <AntDesign
-                    name="like1"
-                    size={24}
-                    color="blue"
-                    onPress={() =>
-                      handleLike(item.author.user_id, item.post_id)
-                    }
-                  />
+                  <AntDesign name="like1" size={24} color="blue" />
                 ) : (
-                  <AntDesign
-                    name="like2"
-                    size={24}
-                    color="black"
-                    onPress={() =>
-                      handleLike(item.author.user_id, item.post_id)
-                    }
-                  />
+                  <AntDesign name="like2" size={24} color="black" />
                 )}
-                <Text style={CommonStyles.txtLikeCount}>Like </Text>
-              </View>
+                <Text style={CommonStyles.txtLikeCount}> Like </Text>
+              </TouchableOpacity>
             </View>
           )}
           ListFooterComponent={notFound == true ? <NoRecordFound /> : null}

@@ -23,16 +23,13 @@ const Draft = ({ navigation }) => {
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   useEffect(async () => {
-    // await ClearDraft();
     setLoading(true);
     await getDraftPosts();
-    console.log('here...');
     setLoading(false);
   }, []);
   const getDraftPosts = async () => {
     setRefreshing(true);
     const posts = await GetDraft();
-    console.log(posts);
     if (posts !== 'undefined' && posts != null) {
       JSON.parse(posts).length === 0 && setNotFound(true);
       setDataList(JSON.parse(posts));
@@ -100,10 +97,7 @@ const Draft = ({ navigation }) => {
             renderItem={({ item }) => (
               <View style={CommonStyles.postCard}>
                 <View style={CommonStyles.rowViewFlexStart}>
-                  <Image
-                    style={CommonStyles.smallImage}
-                    // source={{ uri: `${item.author.profile}` }}
-                  />
+                  <Image style={CommonStyles.smallImage} />
                   <Text style={[CommonStyles.txtAuthorName, { color: 'red' }]}>
                     Draft
                   </Text>

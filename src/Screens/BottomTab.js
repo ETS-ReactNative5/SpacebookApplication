@@ -19,8 +19,11 @@ const Tab = createBottomTabNavigator();
 const BottomTab = ({ navigation }) => {
   const [loggedInuserId, setLoggedInuserId] = useState(0);
   useEffect(async () => {
-    let loggedInUser = await GetUserInfo();
-    setLoggedInuserId(loggedInUser.id);
+    const unsubscribe = navigation.addListener('focus', async () => {
+      let loggedInUser = await GetUserInfo();
+      setLoggedInuserId(loggedInUser.id);
+    });
+    return () => unsubscribe;
   }, [navigation]);
 
   return (
@@ -74,7 +77,7 @@ const BottomTab = ({ navigation }) => {
         name="Friends"
         component={Friends}
         options={{
-          unmountOnBlur: true,
+          // unmountOnBlur: true,
           headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="user-friends" size={size} color={color} />
@@ -85,7 +88,7 @@ const BottomTab = ({ navigation }) => {
         name="AddFriend"
         component={AddFriend}
         options={{
-          unmountOnBlur: true,
+          // unmountOnBlur: true,
           headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Entypo name="add-user" size={size} color={color} />
@@ -96,7 +99,7 @@ const BottomTab = ({ navigation }) => {
         name="FriendRequest"
         component={FriendRequest}
         options={{
-          unmountOnBlur: true, //to re-render screen on tab change
+          // unmountOnBlur: true, //to re-render screen on tab change
           headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons
@@ -112,7 +115,7 @@ const BottomTab = ({ navigation }) => {
         component={Profile}
         options={{
           headerShown: true,
-          unmountOnBlur: true,
+          // unmountOnBlur: true,
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               name="person"

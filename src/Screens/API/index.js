@@ -88,7 +88,7 @@ const convertImageToBase64 = async (blob) =>
 // TODO:Getting info about user i.e name email etc.
 const GetUserData = new Promise(async (resolve, reject) => {
   let loggedInUser = await GetUserInfo();
-  get(`user/${loggedInUser.id}`, loggedInUser.token)
+  await get(`user/${loggedInUser.id}`, loggedInUser.token)
     .then((res) => {
       if (typeof res !== 'undefined') {
         if (res.status === 200) return res.json();
