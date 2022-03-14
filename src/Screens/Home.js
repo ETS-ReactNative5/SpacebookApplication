@@ -106,7 +106,8 @@ const Home = ({ navigation }) => {
                 return {
                   ...item,
                   numLikes: item.numLikes + 1,
-                  like: !item.like,
+                  like: true,
+                  // like: !item.like,
                 };
               }
               return {
@@ -149,7 +150,7 @@ const Home = ({ navigation }) => {
                 return {
                   ...item,
                   numLikes: item.numLikes - 1,
-                  like: !item.like,
+                  like: false,
                 };
               }
               return {
@@ -180,7 +181,6 @@ const Home = ({ navigation }) => {
     const loggedInUser = await GetUserInfo();
     const newData = postList.map((item) => {
       if (item.post_id === selectedPostId) {
-        console.log(item.like, !item.like);
         item.like === false
           ? saveLike(post_authorId, loggedInUser.token, selectedPostId)
           : deleteLike(post_authorId, loggedInUser.token, selectedPostId);
@@ -190,6 +190,7 @@ const Home = ({ navigation }) => {
 
   // TODO: this method will delete post from database where postId=? and userId=?
   const deletePost = async (userId, postId) => {
+    console.log(userId, postId);
     const loggedInUser = await GetUserInfo();
     const headers = {
       'Content-Type': 'application/json',
@@ -302,12 +303,8 @@ const Home = ({ navigation }) => {
                         onPress={() =>
                           navigation.navigate('EditPost', {
                             post_id: item.post_id,
-                            text: item.text,
                             user_id: item.author.user_id,
                             token,
-                            first_name: item.author.first_name,
-                            last_name: item.author.last_name,
-                            email: item.author.email,
                             profile: item.author.profile,
                           })
                         }

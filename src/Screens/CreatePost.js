@@ -31,6 +31,7 @@ const CreatePost = ({ navigation, route }) => {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+
   const savePost = async () => {
     const headers = {
       'Content-Type': 'application/json',
